@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>页面走丢了 · 了了了传输助手</title>
+<style>
+  :root {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --ink: #0d1522;
+    --ink-soft: #5b6675;
+    --line: #dbe4ef;
+    --brand: #10b3a3;
+    --brand-2: #2f7cf6;
+    --shadow: 0 20px 60px -30px rgba(13, 21, 34, .45);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #070c14;
+      --card: #111925;
+      --ink: #e9f0f8;
+      --ink-soft: #93a1b3;
+      --line: #21303f;
+      --brand: #2ee6cd;
+      --brand-2: #63a4ff;
+      --shadow: 0 20px 60px -30px rgba(0, 0, 0, .9);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    width: min(560px, 100%);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow: var(--shadow);
+  }
+  .mark { display: flex; align-items: center; gap: 12px; }
+  .mark svg { width: 38px; height: 38px; }
+  .mark b { font-size: 15px; letter-spacing: .04em; font-weight: 600; }
+  code {
+    display: inline-block;
+    margin: 22px 0 8px;
+    font: 700 52px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em;
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  h1 { margin: 0 0 10px; font-size: 22px; font-weight: 650; letter-spacing: .01em; }
+  p { margin: 0 0 8px; color: var(--ink-soft); font-size: 14.5px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    text-decoration: none;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  a:hover { transform: translateY(-1px); border-color: var(--brand); }
+  a.primary {
+    border: none;
+    color: #041014;
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
+    font-weight: 600;
+  }
+  .en { display: none; }
+  body.en .en { display: block; }
+  body.en .zh { display: none; }
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-soft); }
+  @media (prefers-reduced-motion: reduce) { a { transition: none; } }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#10b3a3"/><stop offset="1" stop-color="#2f7cf6"/>
+          </linearGradient>
+        </defs>
+        <path d="M8 18h20l-5-6M48 30H28l5 6" stroke="url(#g)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b class="zh">了了了传输助手</b>
+      <b class="en">Lelele Transfer Assistant</b>
+    </div>
+
+    <code>404</code>
+
+    <h1 class="zh">这个地址没有东西</h1>
+    <h1 class="en">Nothing lives at this address</h1>
+
+    <p class="zh">可能是链接拼错了，或者这个页面早就搬走了。设备码与群号都在首页，回去重新扫码或输入即可。</p>
+    <p class="en">The link may be mistyped, or the page moved. Your device code and group code are on the home page.</p>
+
+    <div class="btns">
+      <a class="primary" href="./index.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+        <span class="zh">回到首页</span><span class="en">Back to app</span>
+      </a>
+      <a href="./index.html#transfer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h13"/><path d="m13 7 5 5-5 5"/></svg>
+        <span class="zh">去传文件</span><span class="en">Send files</span>
+      </a>
+      <a href="./index.html#chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H8l-4 3v-5a8 8 0 1 1 17-6Z"/></svg>
+        <span class="zh">去聊天</span><span class="en">Open chat</span>
+      </a>
+    </div>
+
+    <footer>
+      <span class="zh">提示：应用离线也能打开，但设备之间要传文件，两台设备需在同一个局域网（或同一条可用链路）里。</span>
+      <span class="en">Note: the app opens offline, but devices must share the same local network to exchange files.</span>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var lang = navigator.language || 'zh';
+      if (!/^zh/i.test(lang) && localStorage.getItem('lta.lang') === 'auto') {
+        document.body.classList.add('en');
+      }
+      try {
+        var stored = localStorage.getItem('lta.lang');
+        if (stored === 'en') document.body.classList.add('en');
+        if (stored === 'zh') document.body.classList.remove('en');
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>了了了传输助手 · LeleleTransferAssistant</title>
+<meta name="description" content="近距离点对点文件传输与聊天工具，无需账号，优先离线。">
+<meta name="color-scheme" content="light dark">
+<script>
+/* 仅用于避免主题闪烁：在首帧前把已保存的外观写进 meta */
+try {
+  var cs = localStorage.getItem('lta.theme');
+  document.querySelector('meta[name="color-scheme"]').content =
+    (cs === 'light' || cs === 'dark') ? cs : 'light dark';
+} catch (e) {}
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180.png">
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F7F9FC" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main" data-i18n="a11y.skip">跳到主要内容</a>
+
+<header class="app-header">
+  <div class="brand">
+    <img class="brand-mark" src="assets/icons/icon-192.png" alt="" width="34" height="34" decoding="async">
+    <div class="brand-text">
+      <h1 class="brand-name" data-i18n="brand.name">了了了传输助手</h1>
+      <p class="brand-en">LeleleTransferAssistant</p>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <button type="button" class="chip" id="btn-mycode" title="点击查看二维码">
+      <span class="chip-label" data-i18n="device.codeLabel">设备码</span>
+      <span class="chip-value" id="hd-code">----</span>
+    </button>
+    <button type="button" class="icon-btn" id="btn-theme" aria-label="切换深色 / 浅色外观">
+      <svg class="ico ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.4M12 19v2.4M2.6 12H5M19 12h2.4M5 5l1.7 1.7M17.3 17.3l1.7 1.7M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>
+      <svg class="ico ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z"/></svg>
+    </button>
+    <button type="button" class="icon-btn" id="btn-lang" aria-label="切换语言 / Switch language">
+      <span class="lang-mark">中/<em>EN</em></span>
+    </button>
+    <button type="button" class="icon-btn" id="btn-settings" aria-label="打开设置">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 3.4v2.2M12 18.4v2.2M4.6 12H2.4M21.6 12h-2.2M6.4 6.4l1.6 1.6M16 16l1.6 1.6M17.6 6.4l-1.6 1.6M8 16l-1.6 1.6"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="tabbar" role="tablist" aria-label="主要功能">
+  <button type="button" class="tab is-active" role="tab" id="tab-transfer" aria-selected="true" aria-controls="panel-transfer" data-panel="transfer">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h11l3 4-3 4H4M20 16H9l-3-4"/></svg>
+    <span data-i18n="nav.transfer">文件传输</span>
+  </button>
+  <button type="button" class="tab" role="tab" id="tab-chat" aria-selected="false" aria-controls="panel-chat" data-panel="chat">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v9.5h-9l-4.5 3.5v-3.5H4z"/></svg>
+    <span data-i18n="nav.chat">聊天</span>
+  </button>
+  <button type="button" class="tab" role="tab" id="tab-log" aria-selected="false" aria-controls="panel-log" data-panel="log">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M5 10h14M5 15h8M5 20h5"/></svg>
+    <span data-i18n="nav.log">运行日志</span>
+  </button>
+</nav>
+
+<main id="main" class="app-main">
+
+  <!-- ================= 文件传输 ================= -->
+  <section class="panel is-active" id="panel-transfer" role="tabpanel" aria-labelledby="tab-transfer">
+    <div class="layout-split">
+
+      <div class="col">
+        <!-- 我的设备 -->
+        <article class="card card-device">
+          <header class="card-head">
+            <h2 data-i18n="device.title">我的设备</h2>
+            <span class="status-dot" id="my-status" data-state="connecting"><i></i><span data-i18n="device.statusConnecting">正在建立</span></span>
+          </header>
+
+          <div class="device-code-row">
+            <button type="button" class="device-code" id="btn-code-qr" aria-describedby="code-hint">
+              <span id="my-code">----</span>
+            </button>
+            <div class="device-meta">
+              <label class="field-label" for="in-name" data-i18n="device.nameLabel">设备名称</label>
+              <input type="text" id="in-name" maxlength="18" class="text-input" data-i18n-ph="device.namePlaceholder" placeholder="给这台设备起个名字">
+            </div>
+          </div>
+
+          <p class="hint" id="code-hint" data-i18n="device.codeHint">把这 4 位码告诉对方，或让对方扫二维码即可连接。</p>
+
+          <div class="row-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-qr-self" data-i18n="device.showQr">我的二维码</button>
+            <button type="button" class="switch" id="sw-hidden" role="switch" aria-checked="false">
+              <i class="track"><b class="knob"></b></i>
+              <span data-i18n="device.hidden">不可查找模式</span>
+            </button>
+          </div>
+          <p class="hint hint-warn" id="hidden-hint" hidden data-i18n="device.hiddenHint">开启后，别人扫描附近设备不会发现你；但知道你 4 位码的人手动输入仍能连上。</p>
+        </article>
+
+        <!-- 连接设备 -->
+        <article class="card">
+          <header class="card-head">
+            <h2 data-i18n="connect.title">连接设备</h2>
+          </header>
+          <form class="connect-form" id="form-connect" autocomplete="off">
+            <input type="text" id="in-code" class="code-input" inputmode="numeric" maxlength="7"
+                   aria-label="设备码" data-i18n-ph="connect.inputPlaceholder" placeholder="输入 4 位设备码">
+            <button type="submit" class="btn btn-primary" data-i18n="connect.btn">连接</button>
+          </form>
+          <div class="scan-block">
+            <div class="scan-actions">
+              <button type="button" class="btn btn-outline" id="btn-scan" data-i18n="connect.scanBtn">查找附近设备</button>
+              <button type="button" class="btn btn-outline" id="btn-scanqr" data-i18n="connect.scanQr">扫码连接</button>
+            </div>
+            <div class="scan-meter" id="scan-meter" hidden>
+              <div class="bar"><i id="scan-bar"></i></div>
+              <div class="scan-line">
+                <span id="scan-text">扫描中 0%</span>
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-scan-stop" data-i18n="connect.stop">停止</button>
+              </div>
+            </div>
+            <p class="hint" data-i18n="connect.scanHint">扫描会依次探测 0000–9999，发现设备立即显示，可随时停止。仅同一局域网 / 同一信令下有效。</p>
+          </div>
+
+          <h3 class="sub-title"><span data-i18n="connect.nearby">附近设备</span> <span class="counter" id="found-count">0</span></h3>
+          <ul class="device-list" id="found-list"></ul>
+          <p class="empty-line" id="found-empty" data-i18n="connect.empty">还没有发现设备。先扫描，或直接输入对方的 4 位码。</p>
+        </article>
+
+        <!-- 蓝牙 -->
+        <article class="card">
+          <header class="card-head">
+            <h2 data-i18n="bt.title">蓝牙 / 系统分享</h2>
+          </header>
+          <p class="hint" data-i18n="bt.hint">没网或网速很差时，用系统分享把文件发给对方（AirDrop、蓝牙、附近分享都在这里）。</p>
+          <div class="row-actions">
+            <button type="button" class="btn btn-outline btn-sm" id="btn-share-files" data-i18n="bt.share">系统分享发送文件</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-gatt" data-i18n="bt.gatt">连接 BLE 设备</button>
+          </div>
+          <p class="hint" data-i18n="bt.gattHint">浏览器无法自己当蓝牙外设，所以网页之间不能直连蓝牙。要走蓝牙请用上面的系统分享。</p>
+        </article>
+      </div>
+
+      <div class="col">
+        <article class="card card-queue">
+          <header class="card-head">
+            <h2 data-i18n="transfer.title">传输队列</h2>
+            <div class="head-tools">
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-finished" data-i18n="transfer.clearFinished">清除已完成</button>
+            </div>
+          </header>
+
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-describedby="drop-hint">
+            <svg class="ico ico-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 16v3.5h16V16"/></svg>
+            <p class="drop-main" data-i18n="transfer.drop">拖文件到这里，或点击选择文件</p>
+            <p class="hint" id="drop-hint" data-i18n="transfer.dropHint">支持多文件同时传 · 电脑与手机互通 · 单块 500KB 可断点续传</p>
+            <input type="file" id="file-input" multiple class="visually-hidden">
+          </div>
+
+          <ul class="transfer-list" id="transfer-list"></ul>
+          <p class="empty-line" id="transfer-empty" data-i18n="transfer.empty">暂无传输任务。</p>
+
+          <p class="notice notice-warn" id="transfer-notice" hidden>
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5M12 3 2.5 20h19z"/></svg>
+            <span data-i18n="transfer.keepOpen">传输过程中请不要关闭页面，未完成的文件会丢失。</span>
+          </p>
+        </article>
+
+        <article class="card">
+          <header class="card-head">
+            <h2 data-i18n="peers.title">已连接</h2>
+          </header>
+          <ul class="peer-list" id="peer-list"></ul>
+          <p class="empty-line" id="peer-empty" data-i18n="peers.empty">还没有连接任何设备。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 聊天 ================= -->
+  <section class="panel" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" hidden>
+    <div class="chat-layout">
+      <aside class="chat-side">
+        <div class="chat-side-head">
+          <h2 data-i18n="chat.title">聊天</h2>
+          <button type="button" class="icon-btn" id="btn-new-group" aria-label="新建 / 加入群聊">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <ul class="conv-list" id="conv-list"></ul>
+        <p class="empty-line" id="conv-empty" data-i18n="chat.noConvList">先连接设备，或创建一个群聊。</p>
+      </aside>
+
+      <section class="chat-main">
+        <header class="chat-main-head">
+          <div>
+            <h2 id="chat-title" data-i18n="chat.noConv">选择一个会话</h2>
+            <p class="chat-sub" id="chat-sub"></p>
+          </div>
+          <div class="head-tools">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-chat-members" data-i18n="chat.members">成员</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-chat-qr" data-i18n="chat.qr">群二维码</button>
+          </div>
+        </header>
+
+        <div class="chat-members" id="chat-members" hidden></div>
+
+        <div class="msg-scroll" id="msg-scroll">
+          <div class="chat-empty" id="chat-empty">
+            <p data-i18n="chat.noConvHint">连接一台设备，或在右上角创建 / 加入群聊，就能开始发消息、传文件和录音。</p>
+          </div>
+          <ul class="msg-list" id="msg-list"></ul>
+        </div>
+
+        <div class="recorder-bar" id="recorder-bar" hidden>
+          <span class="rec-dot" aria-hidden="true"></span>
+          <span id="rec-time">0.0s / 60s</span>
+          <div class="bar bar-thin"><i id="rec-bar"></i></div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-rec-stop" data-i18n="chat.stopRecord">停止并发送</button>
+        </div>
+
+        <form class="composer" id="form-chat" autocomplete="off">
+          <button type="button" class="icon-btn" id="btn-attach" aria-label="发送文件">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 7.5 8 15a3 3 0 0 0 4.2 4.2l7.6-7.6a5 5 0 0 0-7-7l-7.6 7.6a7 7 0 0 0 10 10l6.4-6.4"/></svg>
+          </button>
+          <button type="button" class="icon-btn" id="btn-record" aria-label="录一段语音（最长 60 秒）">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <input type="text" id="in-msg" class="text-input" data-i18n-ph="chat.inputPlaceholder" placeholder="说点什么…" maxlength="4000">
+          <button type="submit" class="btn btn-primary" data-i18n="chat.send">发送</button>
+          <input type="file" id="chat-file-input" multiple class="visually-hidden">
+        </form>
+      </section>
+    </div>
+  </section>
+
+  <!-- ================= 日志 ================= -->
+  <section class="panel" id="panel-log" role="tabpanel" aria-labelledby="tab-log" hidden>
+    <article class="card">
+      <header class="card-head">
+        <h2 data-i18n="log.title">运行日志</h2>
+        <div class="head-tools">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-log-clear" data-i18n="log.clear">清空</button>
+        </div>
+      </header>
+      <p class="hint" data-i18n="log.hint">这里记录发生了什么。看不懂没关系，出问题时把这行文字发给对方即可。</p>
+      <ul class="log-list" id="log-list"></ul>
+      <p class="empty-line" id="log-empty" data-i18n="log.empty">暂无日志。</p>
+    </article>
+  </section>
+</main>
+
+<!-- ============ 对话框 ============ -->
+<dialog id="dlg-scanqr" aria-labelledby="dsq-title">
+  <form method="dialog" class="dialog-card">
+    <header class="dialog-head">
+      <h2 id="dsq-title" data-i18n="scanQr.title">扫码连接</h2>
+      <button class="icon-btn" value="cancel" aria-label="关闭" data-i18n-label="common.close">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </header>
+    <div class="dialog-body">
+      <div class="scanqr-stage">
+        <video id="scanqr-video" playsinline muted autoplay></video>
+        <div class="scanqr-frame" aria-hidden="true"></div>
+      </div>
+      <p class="hint" id="scanqr-hint" data-i18n="scanQr.hint">把对方的二维码放进框里，识别后会自动填入设备码。</p>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn btn-ghost" value="cancel" data-i18n="common.cancel">取消</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="dlg-qr" aria-labelledby="qr-title">
+  <h2 id="qr-title" data-i18n="qr.title">扫码连接</h2>
+  <div class="qr-wrap"><div id="qr-box" class="qr-box"></div></div>
+  <p class="qr-code-line" id="qr-code-line"></p>
+  <p class="hint" id="qr-sub"></p>
+  <form method="dialog" class="dialog-actions">
+    <button class="btn btn-ghost" value="close" data-i18n="common.close">关闭</button>
+  </form>
+</dialog>
+
+<dialog id="dlg-connect" aria-labelledby="dc-title">
+  <h2 id="dc-title" data-i18n="incoming.title">有设备请求连接</h2>
+  <p class="dialog-body" id="dc-body"></p>
+  <form method="dialog" class="dialog-actions">
+    <button class="btn btn-ghost" value="reject" data-i18n="incoming.reject">拒绝</button>
+    <button class="btn btn-primary" value="accept" autofocus data-i18n="incoming.accept">允许连接</button>
+  </form>
+</dialog>
+
+<dialog id="dlg-file" aria-labelledby="df-title">
+  <h2 id="df-title" data-i18n="incomingFile.title">对方要发文件给你</h2>
+  <p class="dialog-body" id="df-body"></p>
+  <form method="dialog" class="dialog-actions">
+    <button class="btn btn-ghost" value="reject" data-i18n="incoming.reject">拒绝</button>
+    <button class="btn btn-primary" value="accept" autofocus data-i18n="incomingFile.accept">接收</button>
+  </form>
+</dialog>
+
+<dialog id="dlg-group" aria-labelledby="dg-title">
+  <h2 id="dg-title" data-i18n="group.title">群聊</h2>
+  <p class="hint" data-i18n="group.hint">群号与设备码是两套号码。任何成员都能当节点，一个人掉线其他人还能继续聊。</p>
+  <form id="form-group" class="group-form" autocomplete="off">
+    <label class="field-label" for="in-group-code" data-i18n="group.codeLabel">群号（4 位数字）</label>
+    <input type="text" id="in-group-code" class="code-input" inputmode="numeric" maxlength="4" data-i18n-ph="group.codePlaceholder" placeholder="例如 2048">
+    <label class="field-label" for="in-group-name" data-i18n="group.nameLabel">群名称</label>
+    <input type="text" id="in-group-name" class="text-input" maxlength="24" data-i18n-ph="group.namePlaceholder" placeholder="例如 客厅局域网">
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" id="btn-group-cancel" data-i18n="common.close">关闭</button>
+      <button type="submit" class="btn btn-primary" value="join" data-i18n="group.join">加入</button>
+    </div>
+    <p class="hint hint-warn" id="group-error" hidden></p>
+  </form>
+</dialog>
+
+<dialog id="dlg-settings" aria-labelledby="ds-title">
+  <h2 id="ds-title" data-i18n="settings.title">设置</h2>
+  <div class="settings-body">
+    <section class="settings-group">
+      <h3 data-i18n="settings.appearance">外观与语言</h3>
+      <div class="settings-row">
+        <span class="settings-label" data-i18n="settings.theme">外观</span>
+        <div class="segmented" role="radiogroup" aria-label="外观">
+          <button type="button" role="radio" data-theme-set="system" aria-checked="false" data-i18n="settings.themeSystem">跟随系统</button>
+          <button type="button" role="radio" data-theme-set="light" aria-checked="false" data-i18n="settings.themeLight">浅色</button>
+          <button type="button" role="radio" data-theme-set="dark" aria-checked="false" data-i18n="settings.themeDark">深色</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label" data-i18n="settings.lang">语言</span>
+        <div class="segmented" role="radiogroup" aria-label="语言">
+          <button type="button" role="radio" data-lang-set="auto" aria-checked="false" data-i18n="settings.langAuto">自动</button>
+          <button type="button" role="radio" data-lang-set="zh" aria-checked="false">中文</button>
+          <button type="button" role="radio" data-lang-set="en" aria-checked="false">English</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-group">
+      <h3 data-i18n="settings.permission">连接与文件</h3>
+      <div class="settings-row">
+        <span class="settings-label" data-i18n="settings.acceptConnect">陌生设备可直接连接</span>
+        <button type="button" class="switch" id="sw-auto-connect" role="switch" aria-checked="false" aria-label="陌生设备可直接连接"><i class="track"><b class="knob"></b></i></button>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label" data-i18n="settings.acceptFile">陌生设备可直接传文件</span>
+        <button type="button" class="switch" id="sw-auto-file" role="switch" aria-checked="false" aria-label="陌生设备可直接传文件"><i class="track"><b class="knob"></b></i></button>
+      </div>
+    </section>
+
+    <section class="settings-group">
+      <h3 data-i18n="settings.contacts">信任设备</h3>
+      <p class="hint" data-i18n="settings.contactsHint">信任设备发来的文件和消息不再弹确认。数据只存在这台设备的浏览器里。</p>
+      <ul class="contact-list" id="contact-list"></ul>
+      <p class="empty-line" id="contact-empty" data-i18n="settings.contactsEmpty">暂无信任设备。</p>
+    </section>
+
+    <section class="settings-group">
+      <h3 data-i18n="settings.signal">信令服务</h3>
+      <p class="hint" data-i18n="settings.signalHint">默认用公共 PeerJS 服务建立握手。自己架了服务器的话填在这里，内网也可以用自己的地址。</p>
+      <div class="settings-grid">
+        <label class="field-label" for="in-sig-host" data-i18n="settings.signalHost">主机</label>
+        <input type="text" id="in-sig-host" class="text-input" placeholder="0.peerjs.com">
+        <label class="field-label" for="in-sig-port" data-i18n="settings.signalPort">端口</label>
+        <input type="number" id="in-sig-port" class="text-input" placeholder="443" min="1" max="65535">
+        <label class="field-label" for="in-sig-path" data-i18n="settings.signalPath">路径</label>
+        <input type="text" id="in-sig-path" class="text-input" placeholder="/">
+        <label class="field-label" for="in-sig-key" data-i18n="settings.signalKey">Key</label>
+        <input type="text" id="in-sig-key" class="text-input" placeholder="peerjs">
+      </div>
+    </section>
+
+    <section class="settings-group">
+      <h3 data-i18n="settings.data">本地数据</h3>
+      <div class="row-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-chat" data-i18n="settings.clearChat">清空聊天记录</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-reset" data-i18n="settings.reset">恢复默认设置</button>
+      </div>
+      <p class="hint" data-i18n="settings.dataHint">联系人、聊天记录、设置都保存在本机浏览器。清缓存或换浏览器会丢失。</p>
+    </section>
+  </div>
+  <form method="dialog" class="dialog-actions">
+    <button class="btn btn-primary" value="ok" data-i18n="settings.close">完成</button>
+  </form>
+</dialog>
+
+<div class="toast-region" id="toast-region" role="region" aria-label="通知"></div>
+
+<script src="assets/vendor/peerjs.min.js" defer></script>
+<script src="assets/vendor/qrcode-generator.js" defer></script>
+<script src="assets/vendor/jsQR.js" defer></script>
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/store.js" defer></script>
+<script src="assets/js/log.js" defer></script>
+<script src="assets/js/record.js" defer></script>
+<script src="assets/js/net.js" defer></script>
+<script src="assets/js/registry.js" defer></script>
+<script src="assets/js/scanner.js" defer></script>
+<script src="assets/js/transfer.js" defer></script>
+<script src="assets/js/chat.js" defer></script>
+<script src="assets/js/bt.js" defer></script>
+<script src="assets/js/pwa.js" defer></script>
+<script src="assets/js/settings.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

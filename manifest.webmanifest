@@ -1,0 +1,56 @@
+{
+  "id": "./",
+  "name": "了了了传输助手 · LeleleTransferAssistant",
+  "short_name": "了了了传输",
+  "description": "近距离点对点文件传输与聊天工具：无需账号，优先离线，电脑与手机互通。",
+  "lang": "zh-Hans",
+  "dir": "ltr",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0a0f18",
+  "theme_color": "#0a0f18",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "文件传输",
+      "short_name": "传输",
+      "url": "./index.html#transfer",
+      "description": "打开传输面板"
+    },
+    {
+      "name": "聊天",
+      "short_name": "聊天",
+      "url": "./index.html#chat",
+      "description": "打开聊天面板"
+    }
+  ]
+}
